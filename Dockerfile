@@ -16,8 +16,11 @@ COPY . .
 # Realiza o build do projeto (substitua pelo seu comando de build específico)
 #RUN npm run build
 
-# Etapa 2: Criar a imagem final
-FROM node:17
+# Escolha a imagem base
+FROM alpine:latest
+
+# Instale o Node.js e o npm
+RUN apk add --update nodejs npm
 
 # Define o diretório de trabalho para a imagem final
 WORKDIR /app

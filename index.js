@@ -54,7 +54,7 @@ app.get('/clientes/:id/extrato', async (req, res) => {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.error('Erro ao buscar dados:', error);
+    //console.error('Erro ao buscar dados:', error);
     res.status(500).json();
   }
   finally{
@@ -108,11 +108,11 @@ app.post('/clientes/:id/transacoes', async (req, res) => {
     return res.status(200).json({ limite: client.rows[0].limite, saldo: novoSaldo.rows[0].valor })
   } catch (error) {
     await clientConnect.query('ROLLBACK');
-    console.error('Erro ao buscar dados:', error);
+    //console.error('Erro ao buscar dados:', error);
     return res.status(500).json();
   }
   finally {
-    await clientConnect.release();
+     clientConnect.release();
   }
 
 })
