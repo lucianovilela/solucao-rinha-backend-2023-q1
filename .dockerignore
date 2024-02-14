@@ -1,2 +1,3 @@
 ./exemplo/** 
 ./node_module/**
+./.env
