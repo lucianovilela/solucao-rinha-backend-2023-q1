@@ -15,14 +15,16 @@ const port = process.env.PORT || 9999;
 
 // Configurações do banco de dados
 const pool = new Pool({
-  user: process.env.USERDB,
-  host: process.env.HOSTDB,
-  database: process.env.DB,
-  password: process.env.PASSWORDDB,
+  user: process.env.USERDB || 'admin',
+  host: process.env.HOSTDB || 'localhost',
+  database: process.env.DB || 'rinha',
+  password: process.env.PASSWORDDB || '123',
   port: 5432, // Porta padrão do PostgreSQL
   max:process.env.MAX || 20,
 
 });
+
+
 
 
 
@@ -117,8 +119,28 @@ app.post('/clientes/:id/transacoes', async (req, res) => {
 
 })
 
-// Inicie o servidor
-app.listen(port, async () => {
+var attempts = 0;
 
-  console.log(`Servidor rodando na porta ${port}`);
+
+async function fetchData(attempts = 0) {
+  try {
+    await pool.query("select 1");
+    console.log("Conexão com o banco de dados estabelecida com sucesso");
+  } catch (error) {
+    console.log("Erro ao conectar com o banco de dados", new Date());
+    if (attempts < 15) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(fetchData(attempts + 1)), 2000);
+      });
+    } else {
+      console.log('Falha ao buscar dados após 5 tentativas');
+    }
+  }
+}
+
+
+fetchData().then(() => {
+  app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
+  });
 });

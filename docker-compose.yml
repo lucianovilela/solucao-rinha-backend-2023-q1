@@ -2,21 +2,20 @@ version: "3.5"
 
 services:
   api01: &api
-    build:
-      dockerfile: Dockerfile
-    
+    image: lucianovilela/rinha-backend-2024-q1:latest
     hostname: api01
     environment:
       - USERDB=admin
-      - HOSTDB=db
+      - HOSTDB=localhost
       - DB=rinha
       - PASSWORDDB=123
-      - PORT=3000
+      - PORT=9000
     ports:
-      - "3000:3000"
+      - "9000:9000"
     network_mode: host
     depends_on:
       - db
+    restart: on-failure
     deploy:
       resources:
         limits:
@@ -28,14 +27,14 @@ services:
     hostname: api02
     environment:
       - USERDB=admin
-      - HOSTDB=db
+      - HOSTDB=localhost
       - DB=rinha
       - PASSWORDDB=123
-      - PORT=3001
-
+      - PORT=9001
     ports:
-      - "3001:3001"
+      - "9001:9001"
     network_mode: host
+
   nginx:
     image: nginx:latest
     volumes:
@@ -45,7 +44,6 @@ services:
       - api02
     ports:
       - "9999:9999"
-    network_mode: host
     deploy:
       resources:
         limits:
@@ -71,7 +69,3 @@ services:
           cpus: "0.35"
           memory: "200MB"
 
-# networks:
-#   default:
-#     driver: bridge
-#     name: rinha-nginx-2024q1
