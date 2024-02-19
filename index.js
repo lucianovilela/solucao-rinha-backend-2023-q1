@@ -36,9 +36,13 @@ app.get('/clientes/:id/extrato', async (req, res) => {
   try {
     const client = await clientConnect.query(`select * from clientes where id=$1`, [req.params.id]);
     if (client.rowCount === 0) return res.status(404).json();
-    const saldo = await clientConnect.query(`select * from saldos where cliente_id=$1`, [req.params.id]);
-    const trans = await clientConnect.query(`select * from transacoes where cliente_id=$1 order by  realizada_em desc limit 10`, [req.params.id]);
-    const transacoes = trans.rows.map(item => ({
+    const saldo = await clientConnect.query(`SELECT s.*, t.*
+    FROM saldos s
+    LEFT JOIN transacoes t ON s.cliente_id = t.cliente_id
+    WHERE s.cliente_id = $1
+    ORDER BY t.realizada_em DESC
+    LIMIT 10`, [req.params.id]);
+    const transacoes = saldo.rows.map(item => ({
       valor: item.valor,
       tipo: item.tipo,
       descricao: item.descricao,
