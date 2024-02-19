@@ -34,15 +34,17 @@ app.get('/clientes/:id/extrato', async (req, res) => {
   const clientConnect = await pool.connect();
 
   try {
-    const client = await clientConnect.query(`select * from clientes where id=$1`, [req.params.id]);
-    if (client.rowCount === 0) return res.status(404).json();
-    const saldo = await clientConnect.query(`SELECT s.*, t.*
-    FROM saldos s
+    const client = await clientConnect.query(`SELECT c.limite, s.valor, t.*
+    FROM clientes c
+    left join saldos s on s.cliente_id = c.id 
     LEFT JOIN transacoes t ON s.cliente_id = t.cliente_id
     WHERE s.cliente_id = $1
     ORDER BY t.realizada_em DESC
-    LIMIT 10`, [req.params.id]);
-    const transacoes = saldo.rows.map(item => ({
+    LIMIT 10
+`, [req.params.id]);
+    if (client.rowCount === 0) return res.status(404).json();
+
+    const transacoes = client.rows.map(item => ({
       valor: item.valor,
       tipo: item.tipo,
       descricao: item.descricao,
@@ -52,7 +54,7 @@ app.get('/clientes/:id/extrato', async (req, res) => {
       saldo: {
         data_extrato: new Date(),
         limite: client.rows[0].limite,
-        total: saldo.rows[0].valor
+        total: client.rows[0].valor
       },
       ultimas_transacoes: [...transacoes]
 
