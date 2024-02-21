@@ -9,10 +9,16 @@ on:
 jobs:
 
   build:
-
+    env: 
+      IMAGE_NAME: "lucianovilela/rinha-backend-2023-q1:$(date +%s)"
+      IMAGE_NAME_LATEST: "lucianovilela/rinha-backend-2023-q1:latest"
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag lucianovilela/rinha-backend-2023-q1:$(date +%s)
+      run: 
+        docker build . --file Dockerfile --tag ${IMAGE_NAME}
+        docker tag ${IMAGE_NAME} ${IMAGE_NAME_LATEST}
+        docker push ${IMAGE_NAME_LATEST}
+        
