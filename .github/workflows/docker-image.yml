@@ -10,7 +10,7 @@ jobs:
 
   build:
     env: 
-      IMAGE_NAME: "lucianovilela/rinha-backend-2023-q1:$(date +%s)"
+      IMAGE_NAME: "lucianovilela/rinha-backend-2023-q1:${{ date +%s }}"
       IMAGE_NAME_LATEST: "lucianovilela/rinha-backend-2023-q1:latest"
     runs-on: ubuntu-latest
 
