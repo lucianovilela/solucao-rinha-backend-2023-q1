@@ -3,7 +3,7 @@
 const  Fastify = require('fastify');
 const { Pool } = require('pg');
 
-const app = Fastify({logger:true})
+const app = Fastify({logger:false})
 const port = process.env.PORT || 9999;
 
 // Configurações do banco de dados
