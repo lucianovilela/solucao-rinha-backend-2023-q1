@@ -1,16 +1,9 @@
 // index.js
 
-const express = require('express');
+const  Fastify = require('fastify');
 const { Pool } = require('pg');
-const bodyParser = require('body-parser');
-//var morgan = require('morgan')
 
-require('dotenv').config();
-
-const app = express();
-//app.use(morgan("combined"));
-
-app.use(bodyParser.json());
+const app = Fastify({logger:true})
 const port = process.env.PORT || 9999;
 
 // Configurações do banco de dados
@@ -42,14 +35,20 @@ app.get('/clientes/:id/extrato', async (req, res) => {
     ORDER BY t.realizada_em DESC
     LIMIT 10
 `, [req.params.id]);
-    if (client.rowCount === 0) return res.status(404).json();
+    if (client.rowCount === 0) return res.status(404).send();
+    let transacoes=[];
+    if(client.rows[0].valor!==null){
 
-    const transacoes = client.rows.map(item => ({
-      valor: item.valor,
-      tipo: item.tipo,
-      descricao: item.descricao,
-      realizada_em: item.realizada_em
-    }))
+      transacoes= client.rows.map(item => ({
+        valor: item.valor,
+        tipo: item.tipo,
+        descricao: item.descricao,
+        realizada_em: item.realizada_em
+      }));
+    }
+    else{
+
+    }
     const result = {
       saldo: {
         data_extrato: new Date(),
@@ -60,10 +59,10 @@ app.get('/clientes/:id/extrato', async (req, res) => {
 
     }
 
-    return res.status(200).json(result);
+    return res.status(200).send(result);
   } catch (error) {
     //console.error('Erro ao buscar dados:', error);
-    res.status(500).json();
+    res.code(500).send();
   }
   finally{
     clientConnect.release();
@@ -92,20 +91,20 @@ const validateRequest = (req) => {
 
 app.post('/clientes/:id/transacoes', async (req, res) => {
   if (!validateRequest(req)) {
-    return res.status(422).json();
+    return res.code(422).send();
   }
   const clientConnect = await pool.connect();
   try {
     await clientConnect.query('BEGIN');
     const client = await clientConnect.query(`select c.limite, b.valor from clientes c inner join saldos b on c.id = b.cliente_id where c.id=$1 for update`, [req.params.id]);
     if (client.rowCount === 0) {
-      await clientConnect.query('ROLLBACK').json();
-      return res.status(404);
+      await clientConnect.query('ROLLBACK');
+      return res.code(404).send();
     }
     if (req.body.tipo === "d"
       && client.rows[0].valor + client.rows[0].limite < (req.body.valor * 1)) {
       await clientConnect.query('ROLLBACK');
-      return res.status(422).json();
+      return res.code(422).send();
     }
 
     const valor = req.body.tipo === "d" ? req.body.valor * -1 : req.body.valor * 1;
@@ -113,11 +112,11 @@ app.post('/clientes/:id/transacoes', async (req, res) => {
     await clientConnect.query('INSERT INTO transacoes(cliente_id, valor, tipo, descricao) values ($1, $2, $3, $4)',
       [req.params.id, req.body.valor * 1, req.body.tipo, req.body.descricao]);
     await clientConnect.query('COMMIT');
-    return res.status(200).json({ limite: client.rows[0].limite, saldo: novoSaldo.rows[0].valor })
+    return res.code(200).send({ limite: client.rows[0].limite, saldo: novoSaldo.rows[0].valor })
   } catch (error) {
     await clientConnect.query('ROLLBACK');
     //console.error('Erro ao buscar dados:', error);
-    return res.status(500).json();
+    return res.code(500).send();
   }
   finally {
      clientConnect.release();
