@@ -25,6 +25,7 @@ RUN apk add --update nodejs npm
 # Define o diretório de trabalho para a imagem final
 WORKDIR /app
 
+USER node
 # Copia os arquivos construídos da imagem intermediária
 COPY --from=builder /app .
 

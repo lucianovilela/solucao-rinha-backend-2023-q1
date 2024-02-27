@@ -1,0 +1,1 @@
+-c shared_buffers=50MB -c work_mem=5MB -c maintenance_work_mem=15MB -c effective_cache_size=150MB-c max_connections=200-c wal_buffers=786kB 
