@@ -145,7 +145,7 @@ async function fetchData(attempts = 0) {
 
 
 fetchData().then(() => {
-  app.listen(port, () => {
+  app.listen({ port:port}, () => {
     console.log(`Servidor rodando na porta ${port}`);
   });
 });
