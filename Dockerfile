@@ -13,6 +13,4 @@ RUN npm install
 # Copia o restante dos arquivos do projeto
 COPY . .
 
-
-# Define o comando para iniciar o aplicativo (substitua pelo seu comando específico)
-CMD ["node", "index.js"]
+CMD ["node", "main.js"]
